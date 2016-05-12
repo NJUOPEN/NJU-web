@@ -10,6 +10,7 @@ pNJU_password=""
 ###########################################
 
 
+#Define portal URL
 pNJU_login_URL="http://p.nju.edu.cn/portal_io/login"
 pNJU_logout_URL="http://p.nju.edu.cn/portal_io/logout"
 
@@ -17,11 +18,37 @@ pNJU_logout_URL="http://p.nju.edu.cn/portal_io/logout"
 function showHelp
 {
     echo "Usage: ./pNJU.sh [-h] [-u USERNAME] [-p PASSWORD] [-i] [-o]"
+    echo "Argument:"
+    echo "      -h           Show help message"
+    echo "      -u USERNAME  Specify your account"
+    echo "      -p PASSWORD  Specify your password"
+    echo "      -i           Do login"
+    echo "      -o           Do logout"
     echo
+}
+
+function getReqProg
+{
+    #Determine program used to make HTTP request
+    temp=$(curl --version 2>/dev/null)
+    if [ -z "$temp" ]; then
+        temp=$(wget --version 2>/dev/null)
+        if [ -z "$temp" ]; then
+            echo "No download program was found."
+            echo "Please install curl or wget first."
+            echo
+            exit 1
+        else
+            REQ_PROG="wget"
+        fi
+    else    
+        REQ_PROG="curl"
+    fi
 }
 
 function login
 {
+    getReqProg
     if [ -z "$pNJU_username" -o -z "$pNJU_password" ]; then
         echo "Please specify username and password to login!"
         echo
@@ -43,6 +70,7 @@ function login
 
 function logout
 {
+    getReqProg
     response=$(curl -s "$pNJU_logout_URL")
     retcode=$(echo $response | grep "\"reply_code\":101")
     if [ ! -z "$retcode" ]; then
@@ -52,28 +80,38 @@ function logout
     fi
 }
 
+has_arg=0
 while getopts "hiou:p:" arg
 do
     case $arg in
         h)
+            has_arg=1
             showHelp
             ;;
         i)
+            has_arg=1
             login
             ;;
         o)
+            has_arg=1
             logout
             ;;
         p)
+            has_arg=1
             pNJU_password=$OPTARG
             ;;
         u)
+            has_arg=1
             pNJU_username=$OPTARG
             ;;
         ?)
+            has_arg=1
             echo "Invalid argument"
             showHelp
             exit 1
             ;;
     esac
 done
+if [ $has_arg -eq 0 ]; then
+    showHelp
+fi
