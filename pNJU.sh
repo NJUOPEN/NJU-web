@@ -39,10 +39,10 @@ function getReqProg
             echo
             exit 1
         else
-            REQ_PROG="wget"
+            REQ_PROG="wget -q -O -"
         fi
     else    
-        REQ_PROG="curl"
+        REQ_PROG="curl -s"
     fi
 }
 
@@ -54,7 +54,7 @@ function login
         echo
         return
     fi
-    response=$(curl -s "$pNJU_login_URL?username=$pNJU_username&password=$pNJU_password")
+    response=$($REQ_PROG "$pNJU_login_URL?username=$pNJU_username&password=$pNJU_password")
     retcode=$(echo $response | grep '"reply_code":1')
     if [ ! -z "$retcode" ]; then
         echo "Login successfully!"
@@ -71,7 +71,7 @@ function login
 function logout
 {
     getReqProg
-    response=$(curl -s "$pNJU_logout_URL")
+    response=$($REQ_PROG "$pNJU_logout_URL")
     retcode=$(echo $response | grep "\"reply_code\":101")
     if [ ! -z "$retcode" ]; then
         echo "Logout successfully!"
