@@ -83,35 +83,31 @@ function logout
 has_arg=0
 while getopts "hiou:p:" arg
 do
+    has_arg=1
     case $arg in
         h)
-            has_arg=1
             showHelp
             ;;
         i)
-            has_arg=1
             login
             ;;
         o)
-            has_arg=1
             logout
             ;;
         p)
-            has_arg=1
             pNJU_password=$OPTARG
             ;;
         u)
-            has_arg=1
             pNJU_username=$OPTARG
             ;;
         ?)
-            has_arg=1
             echo "Invalid argument"
             showHelp
             exit 1
             ;;
     esac
 done
+
 if [ $has_arg -eq 0 ]; then
     showHelp
 fi
